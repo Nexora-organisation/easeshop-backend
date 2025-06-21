@@ -1,5 +1,6 @@
 package com.nexora.easeshop.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,5 +17,6 @@ public class Cart {
     private List<CartItem> cartItems;
 
     @OneToOne(mappedBy = "cart")
+    @JsonIgnore
     private Customer customer;
 }

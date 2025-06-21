@@ -1,11 +1,11 @@
-package com.nexora.easeshop.dtos;
+package com.nexora.easeshop.dtos.customer;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class AuthenticationResponse {
+public class CreateCustomerResponseDTO {
     private String message;
     private String jwt;
 }
