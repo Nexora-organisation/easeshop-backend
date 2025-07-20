@@ -23,32 +23,11 @@ public class CartService {
     private final ProductService productService;
 
     public void addToCart(Long productId) {
-        // 1. Vérifie si le produit existe
         Product product = productService.getProductById(productId);
+        Cart cart = getCustomerCart();
 
-        // 2. Récupère le panier de l'utilisateur
-        Cart customerCart = this.getCustomerCart();
-
-        // 3. Vérifie si le produit est déjà dans le panier
-        Optional<CartItem> existingCartItem = customerCart.
-                getCartItems().
-                stream().
-                filter(item -> item.getProduct().getId().equals(productId)).
-                findFirst();
-
-        if (existingCartItem.isPresent()) {
-            throw new IllegalStateException("Le produit est déjà dans le panier");
-        }
-
-        // 4. Crée un nouvel item et l'ajoute au panier
-        CartItem newItem = new CartItem();
-        newItem.setQuantity(1);
-        newItem.setProduct(product);
-        newItem.setCart(customerCart);
-        customerCart.getCartItems().add(newItem);
-
-        // 5. Sauvegarder le panier en base de donnée
-        cartRepository.save(customerCart);
+        cart.addProduct(product);
+        cartRepository.save(cart);
     }
 
     // Récupérer le panier de l'utilisateur courant
@@ -59,6 +38,19 @@ public class CartService {
     //recuperer le contenu du panier de l'utilisateur courant
     public List<CartItem> getCustomerCartItems() {
         return getCustomerCart().getCartItems();
+    }
+
+    // Retirer un produit du panier de l'utilisateur courant
+    public void removeFromCart(Long productId) {
+        Cart cart = getCustomerCart();
+        cart.removeProduct(productId);
+        cartRepository.save(cart);
+    }
+
+    // avoir le nombre d'éléments du panier courant
+    public int getCurrentCartItemsCount() {
+        Cart cart = getCustomerCart();
+        return cart.getCartItems().size();
     }
 
 }
