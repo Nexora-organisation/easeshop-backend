@@ -2,6 +2,7 @@ package com.nexora.easeshop.config;
 
 import com.nexora.easeshop.ffilters.CustomerAutoProvisioningFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -25,12 +26,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final CustomerAutoProvisioningFilter customerAutoProvisioningFilter;
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, Converter<Jwt, AbstractAuthenticationToken> authenticationConverter) throws Exception {
@@ -45,8 +48,9 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(requests ->
                 requests
-                        .requestMatchers("/api/products", "/api/products/**").permitAll()
+                        .requestMatchers("/api/products", "/api/products/{id}").permitAll()
                         .anyRequest().authenticated()
+
         );
         http.addFilterAfter(customerAutoProvisioningFilter, BearerTokenAuthenticationFilter.class);
         return http.build();
@@ -64,7 +68,7 @@ public class SecurityConfig {
     @Bean
     UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
